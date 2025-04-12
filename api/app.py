@@ -1,12 +1,13 @@
 """
 Basic program that generates bottom N order prices of the specified items
 """
-import json
+
 import asyncio
+import json
 import logging
 import logging.config
-from wfmarkettool import WFMarketTool
 
+from wfmarkettool import WFMarketTool
 
 config = {}
 with open("cfg/logger.json") as cfg:
@@ -174,12 +175,16 @@ async def main() -> None:
         # 'ulfruns_endurance',
         # 'target_fixation',
         # 'airburst_rounds',
-        'jet_stream',
-        'funnel_clouds',
-        'anchored_glide',
-        'rakta_ballistica',
-        'rakta_cernos',
-        'rakta_dark_dagger'
+        # 'jet_stream',
+        # 'funnel_clouds',
+        # 'anchored_glide',
+        # 'rakta_ballistica',
+        # 'rakta_cernos',
+        # 'rakta_dark_dagger'
+        "critical_surge",
+        "mind_freak",
+        "pacifying_bolts",
+        "assimilate",
     }
     tool = WFMarketTool(logger)
     await tool.initialize()
@@ -187,6 +192,7 @@ async def main() -> None:
     await tool.print_multiple_floor_prices(list(items))
 
     await tool.close()
+
 
 if __name__ == "__main__":
     main_task = asyncio.run(main())

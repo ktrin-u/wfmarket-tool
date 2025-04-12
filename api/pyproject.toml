@@ -1,0 +1,98 @@
+[project]
+name = "wfmarket-sell-tool"
+version = "0.1.0"
+description = "personal tool developed in Python in order to have an easy way of checking the floor prices of multiple items"
+authors = [{ name = "ktrin-u" }]
+requires-python = "~=3.13"
+readme = "README.md"
+dependencies = [
+    "requests>=2.32.3,<3",
+    "asyncio>=3.4.3,<4",
+    "aiohttp>=3.11.11,<4",
+    "fastapi[standard]>=0.115.6,<0.116",
+    "beautifulsoup4>=4.12.3,<5",
+]
+
+[tool.uv]
+package = false
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+line-length = 100
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+    "migrations",
+]
+
+[tool.ruff.lint]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)
+select = [
+    # pycodestyle
+    "E",
+    "W",
+    # Pyflakes
+    "F",
+    # flake8-simplify
+    "SIM",
+    # flake8-return
+    "RET",
+    # flake8-bugbear
+    "B",
+    # isort
+    "I",
+    # pyupgrade
+    "UP",
+]
+ignore = [
+    # line too long
+    "E501",
+]
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]  # unused imports
+
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"

@@ -1,16 +1,29 @@
 """
 The class that contains all the functions for the main feature
 """
-import json
-import pprint
+
 import asyncio
-import aiohttp
+import json
 import logging
 import logging.config
+import pprint
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
-from required_types import ItemOrder, Status, Payload, Platinum, OrderType, ProfileOrder, Order, WFToolOperations, WFMarketResponse
+
+import aiohttp
+
 from fastapi_models import FloorPriceResult, ProfileOrderOptimzerResult
+from required_types import (
+    ItemOrder,
+    Order,
+    OrderType,
+    Payload,
+    Platinum,
+    ProfileOrder,
+    Status,
+    WFMarketResponse,
+    WFToolOperations,
+)
 
 
 class WFMarketTool:
@@ -28,6 +41,7 @@ class WFMarketTool:
         _request_timer (Task): a reference to the timer task
 
     """
+
     def __init__(self, logger: logging.Logger | None = None) -> None:
         """
         Initializes a WFMarketTool object
@@ -90,7 +104,7 @@ class WFMarketTool:
 
             async with self._lock:
                 self.request_counter = 0
-                self._logger.info('request counter refreshed')
+                self._logger.info("request counter refreshed")
             await asyncio.sleep(1)
 
     async def _check_request_time_valid(self) -> bool:
@@ -100,7 +114,9 @@ class WFMarketTool:
         if not self._lock:
             raise Exception("lock object not initialized")
 
-        async with self._lock:  # need to lock this part to ensure that request_counter is consistent
+        async with (
+            self._lock
+        ):  # need to lock this part to ensure that request_counter is consistent
             if self.request_counter >= self.REQUEST_LIMIT:
                 return False
 
@@ -115,9 +131,7 @@ class WFMarketTool:
         Parameters:
             item_name (str): the name of the item
         """
-        ret = item_name.strip(" \n")
-        ret = item_name.replace(" ", "_")
-        return ret
+        return item_name.strip(" \n").replace(" ", "_")
 
     async def _get_payload(self, operation: WFToolOperations, target_name: str) -> Payload | None:
         """
@@ -144,10 +158,10 @@ class WFMarketTool:
 
         match operation:
             case WFToolOperations.ITEM_ORDERS:
-                target_url += f"/items/{target_name.lower()}/orders"   # ensure lower case
+                target_url += f"/items/{target_name.lower()}/orders"  # ensure lower case
 
             case WFToolOperations.PROFILE_ORDERS:
-                target_url += f"/profile/{target_name}/orders"   # usernames are case-sensitive
+                target_url += f"/profile/{target_name}/orders"  # usernames are case-sensitive
 
             # case _:
             #     self._logger.error("unsupported operation found, raising exception")
@@ -170,10 +184,11 @@ class WFMarketTool:
         self._logger.warning(f"failed to acquire {operation.value} {target_name}", RuntimeWarning)
         return {}
 
-    async def _validate_item_name(self, item_name: str) -> bool:
-        ...
+    async def _validate_item_name(self, item_name: str) -> bool: ...
 
-    async def _filter_item_orders(self, orders: list[ItemOrder], key_order_type: OrderType = OrderType.SELL) -> list[ItemOrder]:
+    async def _filter_item_orders(
+        self, orders: list[ItemOrder], key_order_type: OrderType = OrderType.SELL
+    ) -> list[ItemOrder]:
         """
         Limit all orders to sell orders only
 
@@ -199,14 +214,17 @@ class WFMarketTool:
                         case Status.OFFLINE.value:
                             return False
                         case _:
-                            logging.warning(f"unsupported status type found in order id {order["id"]}", RuntimeWarning)
+                            logging.warning(
+                                f"unsupported status type found in order id {order['id']}",
+                                RuntimeWarning,
+                            )
                             return False
-            raise Exception(f"order {order["id"]} has no user key")
+            raise Exception(f"order {order['id']} has no user key")
 
         def filter_func(order: ItemOrder) -> bool:
             order_type = order.get("order_type")
             if order_type is None:
-                logging.warning(f"order with id {order["id"]} is invalid", RuntimeWarning)
+                logging.warning(f"order with id {order['id']} is invalid", RuntimeWarning)
                 return False
             if order_type is not None and order_type == key_order_type.value:
                 return remove_non_in_game(order)
@@ -215,7 +233,9 @@ class WFMarketTool:
 
         return list(filter(filter_func, orders))
 
-    async def _get_plat_prices(self, orders: Sequence[Order], sort_descending: bool = False) -> list[Platinum]:
+    async def _get_plat_prices(
+        self, orders: Sequence[Order], sort_descending: bool = False
+    ) -> list[Platinum]:
         """
         Gets all the platinum prices from the a list of orders
 
@@ -232,7 +252,7 @@ class WFMarketTool:
             if type(plat) is Platinum:
                 prices.append(plat)
                 continue
-            self._logger.warning(f"order {order["id"]} has no platinum key", RuntimeWarning)
+            self._logger.warning(f"order {order['id']} has no platinum key", RuntimeWarning)
 
         if sort_descending:
             prices.sort(reverse=True)
@@ -241,7 +261,9 @@ class WFMarketTool:
         prices.sort()
         return prices
 
-    async def get_item_orders(self, item_name: str, order_type: OrderType = OrderType.SELL) -> list[ItemOrder]:
+    async def get_item_orders(
+        self, item_name: str, order_type: OrderType = OrderType.SELL
+    ) -> list[ItemOrder]:
         """
         Get the order key of the payload
 
@@ -278,7 +300,9 @@ class WFMarketTool:
         plat_prices = await self._get_plat_prices(sell_orders)
         return FloorPriceResult(item_name=item_name, prices=plat_prices[:order_count])
 
-    async def print_multiple_floor_prices(self, item_name_list: list[str], order_count: int = 5) -> None:
+    async def print_multiple_floor_prices(
+        self, item_name_list: list[str], order_count: int = 5
+    ) -> None:
         """
         Gets the {order_count} lowest prices for multiple items
 
@@ -297,7 +321,9 @@ class WFMarketTool:
 
         await asyncio.wait(awaitables)
 
-    async def get_profile_orders(self, username: str, order_type: OrderType = OrderType.SELL) -> list[ProfileOrder]:
+    async def get_profile_orders(
+        self, username: str, order_type: OrderType = OrderType.SELL
+    ) -> list[ProfileOrder]:
         payload = await self._get_payload(WFToolOperations.PROFILE_ORDERS, username)
         if payload is None:
             self._logger.warning("unable to get orders from payload None", RuntimeWarning)
@@ -318,7 +344,7 @@ class WFMarketTool:
         username: str,
         order_type: OrderType = OrderType.SELL,
         order_count: int = 5,
-        visible_only: bool = True
+        visible_only: bool = True,
     ) -> list[ProfileOrderOptimzerResult]:
         """
         This function is used to determine if all listed visible {order_type} orders are within the {order_count} lowest prices
@@ -335,8 +361,7 @@ class WFMarketTool:
             self._logger.info("removing hidden orders")
 
             def filter_visibility(order: Order) -> bool:
-                visibility = order.get("visible")
-                return True if visibility else False
+                return bool(order.get("visible"))
 
             profile_orders = list(filter(filter_visibility, profile_orders))
 
@@ -357,7 +382,7 @@ class WFMarketTool:
                 ProfileOrderOptimzerResult(
                     item_name=item_name,
                     listed_price=profile_order.get("platinum"),
-                    floor_prices=floor_price_result.prices
+                    floor_prices=floor_price_result.prices,
                 )
             )
 

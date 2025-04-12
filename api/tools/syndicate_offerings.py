@@ -1,13 +1,16 @@
 """
 Program to acquire standing store items of syndicates
 """
-import re
+
 import asyncio
-import aiohttp
 import logging
+import re
+from collections.abc import Coroutine
 from enum import StrEnum
+from typing import Any
+
+import aiohttp
 from bs4 import BeautifulSoup
-from typing import Coroutine, Any
 
 
 class SyndicateLinks(StrEnum):
@@ -21,8 +24,9 @@ class SyndicateLinks(StrEnum):
 
 class SyndicateOfferingScraper:
     """
-    A class that
+    A class that scrapes Syndicate offerings
     """
+
     def __init__(self, logger: logging.Logger | None = None) -> None:
         self._session: aiohttp.ClientSession | None = None
         self._logger: logging.Logger | None = None
@@ -47,30 +51,38 @@ class SyndicateOfferingScraper:
                     raise Exception("expected http status 200, got {resp.status}")
 
     async def get_syndicate_offerings(self, syndicate: SyndicateLinks) -> list[str]:
-        syndicate_html = BeautifulSoup(
-            await self._acquire_syndicate_page(syndicate),
-            "html.parser"
-        )
+        syndicate_html = BeautifulSoup(await self._acquire_syndicate_page(syndicate), "html.parser")
 
-        offerings = syndicate_html.find_all("span", attrs={"style": "color:black; font-weight:700; text-transform:uppercase;"})
+        offerings = syndicate_html.find_all(
+            "span",
+            attrs={"style": "color:black; font-weight:700; text-transform:uppercase;"},
+        )
         offerings_text: list[str] = []
 
         for offering in offerings:
-            text = re.sub(r'\(.*\)', '', offering.string)  # remove unicode representations
+            text = re.sub(r"\(.*\)", "", offering.string)  # remove unicode representations
             text = text.strip(" \n").replace(" ", "_").lower()
             text = text.replace("'", "")
             offerings_text.append(text)
 
         def filter_offerings(offering: str) -> bool:
-            untradeable = ["sigil", "specter", "emote", "set", "cache", "scene", "blueprint", "pack", "stencil", "simulacrum", "syandana", "sculpture"]
-            for word in untradeable:
-                if word in offering:
-                    return False
-            return True
+            untradeable = [
+                "sigil",
+                "specter",
+                "emote",
+                "set",
+                "cache",
+                "scene",
+                "blueprint",
+                "pack",
+                "stencil",
+                "simulacrum",
+                "syandana",
+                "sculpture",
+            ]
+            return all(word not in offering for word in untradeable)
 
-        offerings_text = list(filter(filter_offerings, offerings_text))  # type: ignore
-
-        return offerings_text
+        return list(filter(filter_offerings, offerings_text))  # type: ignore
 
     async def get_multiple_syndicate_offerings(self, syndicates: list[SyndicateLinks]) -> list[str]:
         awaitables: list[Coroutine[Any, Any, list[str]]] = list()

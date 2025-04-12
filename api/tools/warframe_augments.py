@@ -1,12 +1,14 @@
 """
 Program to acquire warframe augment mods
 """
+
 import json
-import aiohttp
 import logging
 import logging.config
 from pathlib import Path
 from typing import TypedDict
+
+import aiohttp
 from bs4 import BeautifulSoup, Tag
 
 
@@ -19,6 +21,7 @@ class WarframeAugmentsScraper:
     """
     A class that
     """
+
     def __init__(self, logger: logging.Logger | None = None) -> None:
         self._session: aiohttp.ClientSession | None = None
         self._ENDPOINT: str = "https://warframe.fandom.com/wiki/Warframe_Augment_Mods"
@@ -54,10 +57,7 @@ class WarframeAugmentsScraper:
                     raise Exception("expected http status 200, got {resp.status}")
 
     async def get_warframe_augments(self) -> dict[str, WarframeAugments]:
-        augment_html = BeautifulSoup(
-            await self._acquire_augments_page(),
-            "html.parser"
-        )
+        augment_html = BeautifulSoup(await self._acquire_augments_page(), "html.parser")
 
         augment_table = augment_html.find(class_="wikitable")
         assert isinstance(augment_table, Tag)
@@ -77,10 +77,7 @@ class WarframeAugmentsScraper:
             warframe_name = details.pop(0)
             syndicates = (details.pop(-1), details.pop(-1))
 
-            augments_list[warframe_name] = WarframeAugments(
-                augments=details,
-                syndicates=syndicates
-            )
+            augments_list[warframe_name] = WarframeAugments(augments=details, syndicates=syndicates)
 
         return augments_list
 

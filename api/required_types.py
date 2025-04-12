@@ -1,8 +1,9 @@
 """
 Collection of Types and Protocols to ensure static typing
 """
-from typing import TypedDict, Required, TypeVar
+
 from enum import StrEnum, auto
+from typing import Required, TypedDict, TypeVar
 
 T = TypeVar("T")
 Platinum = int  # type alias for clarity
@@ -12,6 +13,7 @@ class Status(StrEnum):
     """
     An enum that contains all the possible values for the Warframe Market status
     """
+
     INGAME = auto()
     ONLINE = auto()
     OFFLINE = auto()
@@ -21,6 +23,7 @@ class OrderType(StrEnum):
     """
     An enum that contains all possible values for the Warframe Market order type
     """
+
     BUY = auto()
     SELL = auto()
 
@@ -32,10 +35,12 @@ class OrderType(StrEnum):
 #     GET_TRADEABLE_ITEMS = "/items"
 #     GET_ITEM = "/items"
 
+
 class WFToolOperations(StrEnum):
     """
     An enum that contains the path of the actions supported by the wfmarkettool
     """
+
     ITEM_ORDERS = auto()
     PROFILE_ORDERS = auto()
 
@@ -44,6 +49,7 @@ class User(TypedDict):
     """
     A class that defines the contents of the User object for the Warframe Market response
     """
+
     reputation: int
     locale: str
     avatar: str
@@ -102,6 +108,7 @@ class ItemOrder(Order, total=False):
     """
     A class that defines the contents of the Order object for the Warframe Market response
     """
+
     user: Required[User]
 
 
@@ -113,13 +120,19 @@ class Payload(TypedDict, total=False):
     """
     A class that defines the contents of the payload object for the Warframe Market response
     """
+
     orders: list[ItemOrder]  # result from GET request to API_endpoint/items/{item_name}/orders
-    sell_orders: list[ProfileOrder]  # result from GET request to API_endpoint/profile/{username}/orders
-    buy_orders: list[ProfileOrder]   # result from GET request to API_endpoint/profile/{username}/orders
+    sell_orders: list[
+        ProfileOrder
+    ]  # result from GET request to API_endpoint/profile/{username}/orders
+    buy_orders: list[
+        ProfileOrder
+    ]  # result from GET request to API_endpoint/profile/{username}/orders
 
 
 class WFMarketResponse(TypedDict, total=False):
     """
     A class that defines the contents of the Warframe Market response
     """
+
     payload: Payload
