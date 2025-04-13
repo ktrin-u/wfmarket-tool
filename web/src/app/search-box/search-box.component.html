@@ -1,4 +1,7 @@
-<form>
-    <input type="text" placeholder="{{ placeholder }}" />
-    <button></button>
-</form>
+<div>
+    <input type="text" placeholder="{{ placeholder }}" #names />
+    <button (click)="(getFloorPrice(names.value))"></button>
+</div>
+<div class="results">
+    <span class="content"> Prices:{{ query_results }} </span>
+</div>

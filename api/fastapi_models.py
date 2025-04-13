@@ -4,7 +4,7 @@ Collection of FastAPI models
 
 from pydantic import BaseModel
 
-from required_types import Platinum
+from .required_types import Platinum
 
 
 class FloorPriceResult(BaseModel):

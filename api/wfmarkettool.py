@@ -12,8 +12,8 @@ from pathlib import Path
 
 import aiohttp
 
-from fastapi_models import FloorPriceResult, ProfileOrderOptimzerResult
-from required_types import (
+from .fastapi_models import FloorPriceResult, ProfileOrderOptimzerResult
+from .required_types import (
     ItemOrder,
     Order,
     OrderType,

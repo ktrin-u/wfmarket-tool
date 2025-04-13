@@ -7,15 +7,17 @@
 $total-width: 50vw;
 $search-box-ratio: 0.85;
 $box-height: 5vh;
+$screen-width: 100vw;
+$screen-height: 100vh;
 
-form {
+div {
     height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: rows;
 
-    input {
+    input[type="text"] {
         $padding: 0.5em;
         box-sizing: border-box;
         height: $box-height;
@@ -33,5 +35,25 @@ form {
         background-repeat: no-repeat;
         background-position: center;
         background-color: rgb(87, 126, 255);
+    }
+}
+
+.results {
+    position:fixed;
+    top: 0;
+    left: 0;
+    height: 0.5*$screen-height;
+    width: $screen-width;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .content {
+        text-align: center;
+        size: 5em;
+        color: red;
+        box-sizing: border-box;
+        border: 1px solid #444444;
     }
 }

@@ -6,10 +6,11 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-from fastapi_models import FloorPriceResult, ProfileOrderOptimzerResult
-from required_types import OrderType, ProfileOrder
-from wfmarkettool import WFMarketTool
+from .fastapi_models import FloorPriceResult, ProfileOrderOptimzerResult
+from .required_types import OrderType, ProfileOrder
+from .wfmarkettool import WFMarketTool
 
 logging.basicConfig(
     filename="fastapi_main.log",
@@ -32,13 +33,18 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+origins = "*"
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+)
 wftool: WFMarketTool | None = None
 
 
 @app.get("/wfmarkettool/item_floor_prices/{item_name}")
 async def get_floor_prices(item_name: str = "", order_count: int = 5) -> FloorPriceResult:
     """
-    Get the floor prices of multiple items in warframe.market
+    Get the floor prices of one item in warframe.market
     """
     ret = []
     if wftool:
